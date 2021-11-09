@@ -7,13 +7,7 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <dirent.h>
-
-struct pop_entry {
-  int year;
-  int population;
-  char boro[15];
-};
-
+#include "structrw.h"
 int count_lines(){
   int o = open("nyc_pop.csv", O_RDONLY);
   char c;
