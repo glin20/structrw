@@ -3,6 +3,6 @@ all: structrw.o main.o
 main.o: main.c structrw.h
 	gcc -c main.c
 structrw.o: structrw.c structrw.h
-  gcc -c structrw.c
+	gcc -c structrw.c
 run:
 	./structrw

@@ -29,17 +29,16 @@ int count_lines(){
 
 int count_commas(char *c){
   int count = 0;
-    char *pch=strchr(c,',');
-  while (pch!=NULL) {
+  char *comma = strchr(c,',');
+  while (comma) {
+    comma = strchr(comma+1,',');
     count++;
-    pch=strchr(pch+1,',');
   }
   return count;
 }
 
 void read_csv(){
   char *test2;
-  char *test3;
   int o = open("nyc_pop.csv", O_RDONLY);
   char test[1000];
   read(o, test, sizeof(test));
@@ -67,43 +66,38 @@ void read_csv(){
   }
   strcpy(boroughs[k], borough);
   // make array
-  struct pop_entry pop[(count_lines() - 1) * 5];
+  struct pop_entry *pop = malloc((count_lines() - 1) * 5 * sizeof(struct pop_entry));
   int count = 0;
   for (i = 0; i < count_lines() - 1; i++){
-    test2 = strchr(test , '\n');
+    test2 = strchr(test, '\n');
     *test2++ = '\0';
     int year;
     int population[5];
-    sscanf(test, "%d, %d, %d, %d, %d, %d", &year, &population[0], &population[1], &population[2], &population[3], &population[4]);
+    sscanf(test, "%d, %d, %d, %d, %d, %d", &year, &(population[0]), &(population[1]), &(population[2]), &(population[3]), &(population[4]));
     for (j = 0; j < 5; j++){
       pop[count].year = year;
       pop[count].population = population[j];
       strcpy(pop[count].boro,boroughs[j]);
       count++;
     }
-    /*char year[5];
-    char population[5][100];
-    sscanf(test, "%[^,], %[^,], %[^,], %[^,], %[^,], %s", year, population[0], population[1], population[2], population[3], population[4]);
-    for (j = 0; j < 5; j++){
-      pop[count].year = atoi(year);
-      pop[count].population = atoi(population[j]);
-      strcpy(pop[count].boro,boroughs[j]);
-      count++;
-    }*/
     strcpy(test, test2);
   }
   // write
   int file = open("nyc_pop.data", O_RDWR | O_CREAT | O_TRUNC, 0644);
-  int written = write(file, pop, sizeof(pop));
-  printf("read %lu bytes to nyc_pop.data\n", sizeof(pop));
+  int written = write(file, pop, (count_lines() - 1) * 5 * sizeof(struct pop_entry));
+  printf("read %lu bytes to nyc_pop.data\n", (count_lines() - 1) * 5 * sizeof(struct pop_entry));
+  close(o);
+  free(pop);
 }
 
 void read_data(){
   int i;
+  struct stat sd;
+  stat("nyc_pop.data", &sd);
   int file = open("nyc_pop.data", O_RDONLY);
-  int file_size = lseek(file, 0, SEEK_END);
+  int file_size = sd.st_size;
   file = open("nyc_pop.data", O_RDONLY);
-  struct pop_entry pop2[file_size / sizeof(struct pop_entry)];
+  struct pop_entry *pop2 = malloc(file_size);
   read(file, pop2, file_size);
   for (i = 0; i < file_size / sizeof(struct pop_entry); i++){
     printf("year: %d\t population: %d\t borough: %s\n", pop2[i].year, pop2[i].population, pop2[i].boro);
