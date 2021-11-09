@@ -87,6 +87,7 @@ void read_csv(){
   int written = write(file, pop, (count_lines() - 1) * 5 * sizeof(struct pop_entry));
   printf("read %lu bytes to nyc_pop.data\n", (count_lines() - 1) * 5 * sizeof(struct pop_entry));
   close(o);
+  close(file);
   free(pop);
 }
 
@@ -102,6 +103,7 @@ void read_data(){
   for (i = 0; i < file_size / sizeof(struct pop_entry); i++){
     printf("year: %d\t population: %d\t borough: %s\n", pop2[i].year, pop2[i].population, pop2[i].boro);
   }
+  close(file);
 }
 
 void add_data(){
@@ -112,6 +114,7 @@ void add_data(){
   fgets(data, sizeof(data), stdin);
   sscanf(data, "%d %d %s", &add.year, &add.population, add.boro);
   int written = write(file, &add, sizeof(add));
+  close(file);
 }
 
 void update_data(){
@@ -128,4 +131,5 @@ void update_data(){
   sscanf(data, "%d %d %s", &add.year, &add.population, add.boro);
   lseek(file, number * sizeof(struct pop_entry), SEEK_SET);
   write(file, &add, sizeof(struct pop_entry));
+  close(file);
 }
